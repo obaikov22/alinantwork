@@ -46,93 +46,158 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // ── Full-screen background image ──────────────────────────────────
+          Image.asset(
+            'assets/images/logo.png',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+
+          // ── Dark gradient overlay: transparent top → #0b0c18 bottom ───────
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.0, 0.65],
+                colors: [Colors.transparent, AppColors.background],
+              ),
+            ),
+          ),
+
+          // ── Form content pushed to bottom ─────────────────────────────────
+          SafeArea(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // Logo image
-                Image.asset(
-                  'background.png',
-                  width: 220,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(height: 40),
-
-                // Email field
-                _InputField(
-                  controller: _emailCtrl,
-                  hint: 'Email',
-                  keyboardType: TextInputType.emailAddress,
-                  onSubmitted: (_) => FocusScope.of(context).nextFocus(),
-                ),
-                const SizedBox(height: 12),
-
-                // Password field
-                _InputField(
-                  controller: _passCtrl,
-                  hint: 'Password',
-                  obscure: true,
-                  onSubmitted: (_) => _signIn(),
-                ),
-
-                // Error message
-                if (_error != null) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    _error!,
-                    style: GoogleFonts.sora(
-                      fontSize: 13,
-                      color: AppColors.sickLeave,
-                    ),
-                    textAlign: TextAlign.center,
+                SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    32,
+                    0,
+                    32,
+                    bottomInset > 0 ? bottomInset + 24 : 48,
                   ),
-                ],
-
-                const SizedBox(height: 28),
-
-                // Sign In button
-                GestureDetector(
-                  onTap: _loading ? null : _signIn,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    width: double.infinity,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      gradient: _loading ? null : AppColors.gradient,
-                      color: _loading ? AppColors.surface2 : null,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    alignment: Alignment.center,
-                    child: _loading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ShaderMask(
+                            shaderCallback: (bounds) =>
+                                AppColors.gradient.createShader(bounds),
+                            blendMode: BlendMode.srcIn,
+                            child: Text(
+                              'Alina',
+                              style: GoogleFonts.sora(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
                               ),
                             ),
-                          )
-                        : Text(
-                            'Sign In',
+                          ),
+                          Text(
+                            'NTWork',
                             style: GoogleFonts.sora(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.text,
                             ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Team Leave Tracker',
+                        style: GoogleFonts.sora(
+                          fontSize: 13,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+
+                      // Email field
+                      _InputField(
+                        controller: _emailCtrl,
+                        hint: 'Email',
+                        keyboardType: TextInputType.emailAddress,
+                        onSubmitted: (_) => FocusScope.of(context).nextFocus(),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Password field
+                      _InputField(
+                        controller: _passCtrl,
+                        hint: 'Password',
+                        obscure: true,
+                        onSubmitted: (_) => _signIn(),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Sign In button
+                      GestureDetector(
+                        onTap: _loading ? null : _signIn,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          width: double.infinity,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            gradient: _loading ? null : AppColors.gradient,
+                            color: _loading ? AppColors.surface2 : null,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          alignment: Alignment.center,
+                          child: _loading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  'Sign In',
+                                  style: GoogleFonts.sora(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+
+                      // Error message
+                      if (_error != null) ...[
+                        const SizedBox(height: 14),
+                        Text(
+                          _error!,
+                          style: GoogleFonts.sora(
+                            fontSize: 13,
+                            color: AppColors.sickLeave,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -157,9 +222,9 @@ class _InputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: const Color(0x0fffffff),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: const Color(0x18ffffff)),
       ),
       child: TextField(
         controller: controller,
@@ -168,11 +233,13 @@ class _InputField extends StatelessWidget {
         textInputAction:
             obscure ? TextInputAction.done : TextInputAction.next,
         onSubmitted: onSubmitted,
-        style: GoogleFonts.sora(fontSize: 14, color: AppColors.text),
+        style: GoogleFonts.sora(fontSize: 14, color: Colors.white),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle:
-              GoogleFonts.sora(fontSize: 14, color: AppColors.textMuted),
+          hintStyle: GoogleFonts.sora(
+            fontSize: 14,
+            color: const Color(0x55ffffff),
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
