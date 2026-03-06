@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:open_file_plus/open_file_plus.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -22,6 +22,7 @@ class UpdateService {
       'https://api.github.com/repos/$_repoOwner/$_repoName/releases/latest';
 
   static final _dio = Dio();
+  static const _channel = MethodChannel('com.alinantwork.alinantwork/install');
 
   /// Returns [UpdateInfo] if a newer version is available, or null otherwise.
   /// Returns null silently on 404 (no release yet) or any network error.
@@ -80,7 +81,7 @@ class UpdateService {
       },
     );
 
-    await OpenFile.open(savePath);
+    await _channel.invokeMethod('installApk', {'filePath': savePath});
   }
 
   /// Compares two semver strings (e.g. "1.2.3").
