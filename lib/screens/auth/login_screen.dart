@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuthException;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/auth_service.dart';
@@ -34,10 +35,23 @@ class _LoginScreenState extends State<LoginScreen> {
         _passCtrl.text,
       );
       // GoRouter redirect handles navigation on success
-    } catch (_) {
+    } on FirebaseAuthException catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Invalid email or password.';
+          _error = switch (e.code) {
+            'user-not-found' || 'wrong-password' || 'invalid-credential' =>
+              'Invalid email or password.',
+            'user-disabled' => 'This account has been disabled.',
+            'network-request-failed' => 'No internet connection.',
+            _ => 'Error: ${e.code}',
+          };
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Unexpected error: $e';
           _loading = false;
         });
       }
