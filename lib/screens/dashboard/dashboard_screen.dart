@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../models/employee.dart';
 import '../../models/leave_record.dart';
 import '../../providers/employees_provider.dart';
 import '../../providers/leave_records_provider.dart';
-import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -110,10 +110,10 @@ class DashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, size: 20),
+            icon: const Icon(Icons.settings_outlined, size: 22),
             color: AppColors.textMuted,
-            tooltip: 'Sign out',
-            onPressed: () => _confirmSignOut(context),
+            tooltip: 'Settings',
+            onPressed: () => context.push('/settings'),
           ),
           const SizedBox(width: 4),
         ],
@@ -286,49 +286,6 @@ class DashboardScreen extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-void _confirmSignOut(BuildContext context) {
-  showDialog<void>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Text(
-        'Sign out?',
-        style: GoogleFonts.sora(
-          fontWeight: FontWeight.w700,
-          color: AppColors.text,
-        ),
-      ),
-      content: Text(
-        'You will be returned to the login screen.',
-        style: GoogleFonts.sora(fontSize: 13, color: AppColors.textMuted),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(
-            'Cancel',
-            style: GoogleFonts.sora(color: AppColors.textMuted),
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(ctx);
-            AuthService.instance.signOut();
-          },
-          child: Text(
-            'Sign Out',
-            style: GoogleFonts.sora(
-              color: AppColors.sickLeave,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
 
 String _ordinal(int n) {
   if (n >= 11 && n <= 13) return '${n}th';

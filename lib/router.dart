@@ -9,10 +9,12 @@ import 'providers/leave_records_provider.dart';
 import 'providers/note_records_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/calendar/calendar_screen.dart';
+import 'screens/settings/settings_screen.dart';
 import 'screens/team/team_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/notes/notes_screen.dart';
 import 'theme/app_theme.dart';
+import 'widgets/update_banner.dart';
 
 // Converts a Stream into a ChangeNotifier so GoRouter can listen to auth changes.
 class _GoRouterRefreshStream extends ChangeNotifier {
@@ -81,6 +83,12 @@ final router = GoRouter(
         ),
       ],
     ),
+    GoRoute(
+      path: '/settings',
+      pageBuilder: (context, state) => const MaterialPage(
+        child: SettingsScreen(),
+      ),
+    ),
   ],
 );
 
@@ -123,7 +131,7 @@ class _MainScaffoldState extends ConsumerState<_MainScaffold> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: widget.child,
+      body: UpdateBanner(child: widget.child),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: AppColors.border, width: 1)),
