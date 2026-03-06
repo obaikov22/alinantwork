@@ -55,42 +55,13 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ShaderMask(
-                      shaderCallback: (bounds) =>
-                          AppColors.gradient.createShader(bounds),
-                      blendMode: BlendMode.srcIn,
-                      child: Text(
-                        'Alina',
-                        style: GoogleFonts.sora(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      'NTWork',
-                      style: GoogleFonts.sora(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.text,
-                      ),
-                    ),
-                  ],
+                // Logo image
+                Image.asset(
+                  'background.png',
+                  width: 220,
+                  fit: BoxFit.contain,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Team Leave Tracker',
-                  style: GoogleFonts.sora(
-                    fontSize: 13,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 40),
 
                 // Email field
                 _InputField(

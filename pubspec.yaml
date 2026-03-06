@@ -53,8 +53,20 @@ dev_dependencies:
   # App icon generation
   flutter_launcher_icons: ^0.14.3
 
+  # Splash screen generation
+  flutter_native_splash: ^2.4.3
+
 flutter:
   uses-material-design: true
+  assets:
+    - background.png
+
+flutter_native_splash:
+  color: "#0b0c18"
+  image: background.png
+  android: true
+  ios: true
+  fullscreen: false
 
 flutter_launcher_icons:
   android: true
