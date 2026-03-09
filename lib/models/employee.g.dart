@@ -25,13 +25,14 @@ class EmployeeAdapter extends TypeAdapter<Employee> {
       color: fields[5] as int,
       createdAt: fields[6] as DateTime,
       role: fields[7] as String?,
+      weekendDays: (fields[8] as List?)?.cast<int>() ?? [6, 7],
     );
   }
 
   @override
   void write(BinaryWriter writer, Employee obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class EmployeeAdapter extends TypeAdapter<Employee> {
       ..writeByte(6)
       ..write(obj.createdAt)
       ..writeByte(7)
-      ..write(obj.role);
+      ..write(obj.role)
+      ..writeByte(8)
+      ..write(obj.weekendDays);
   }
 
   @override

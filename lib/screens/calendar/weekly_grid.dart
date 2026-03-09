@@ -230,11 +230,13 @@ class _EmployeeRow extends StatelessWidget {
             final isBirthday = employee.birthday.month == day.month &&
                 employee.birthday.day == day.day;
             final isToday = _sameDay(day, today);
+            final isWeekend = employee.weekendDays.contains(day.weekday);
             return _DayCell(
               day: day,
               record: record,
               isBirthday: isBirthday,
               isToday: isToday,
+              isWeekend: isWeekend,
               width: cellWidth,
               onLongPress: record != null && onDeleteRecord != null
                   ? () => onDeleteRecord!(record)
@@ -252,6 +254,7 @@ class _DayCell extends StatelessWidget {
   final LeaveRecord? record;
   final bool isBirthday;
   final bool isToday;
+  final bool isWeekend;
   final double width;
   final VoidCallback? onLongPress;
 
@@ -260,6 +263,7 @@ class _DayCell extends StatelessWidget {
     required this.record,
     required this.isBirthday,
     required this.isToday,
+    required this.isWeekend,
     required this.width,
     this.onLongPress,
   });
@@ -286,42 +290,42 @@ class _DayCell extends StatelessWidget {
   _CellStyle _computeStyle() {
     if (record != null) return _leaveStyle();
     if (isBirthday) return _birthdayStyle();
+    if (isWeekend) return _weekendStyle();
     return _emptyStyle();
+  }
+
+  _CellStyle _weekendStyle() {
+    return _CellStyle(
+      bgColor: AppColors.weekendCell,
+      radius: BorderRadius.circular(3),
+      border: Border.all(
+        color: isToday ? AppColors.gradientStart : AppColors.border,
+      ),
+      child: null,
+    );
   }
 
   _CellStyle _leaveStyle() {
     final Color baseColor;
-    final double bgAlpha;
-    final double borderAlpha;
     final Widget? child;
 
     switch (record!.type) {
       case LeaveType.annual:
         baseColor = AppColors.annualLeave;
-        bgAlpha = 0.082;
-        borderAlpha = 0.22;
         child = null;
       case LeaveType.sick:
         baseColor = AppColors.sickLeave;
-        bgAlpha = 0.118;
-        borderAlpha = 0.196;
         child = null;
       case LeaveType.birthdayHoliday:
         baseColor = AppColors.gradientStart;
-        bgAlpha = 0.102;
-        borderAlpha = 0.208;
         child = const Text('🎂', style: TextStyle(fontSize: 11));
       case LeaveType.bankHoliday:
         baseColor = AppColors.bankHoliday;
-        bgAlpha = 0.082;
-        borderAlpha = 0.188;
         child = null;
     }
 
-    final bgColor = baseColor.withValues(alpha: bgAlpha);
-    final borderColor = isToday
-        ? AppColors.gradientStart
-        : baseColor.withValues(alpha: borderAlpha);
+    final bgColor = baseColor;
+    final borderColor = isToday ? AppColors.gradientStart : baseColor;
 
     return _CellStyle(
       bgColor: bgColor,
@@ -332,11 +336,9 @@ class _DayCell extends StatelessWidget {
   }
 
   _CellStyle _birthdayStyle() {
-    final borderColor = isToday
-        ? AppColors.gradientStart
-        : AppColors.birthday.withValues(alpha: 0.25);
+    final borderColor = isToday ? AppColors.gradientStart : AppColors.birthday;
     return _CellStyle(
-      bgColor: AppColors.birthday.withValues(alpha: 0.125),
+      bgColor: AppColors.birthday,
       radius: BorderRadius.circular(3),
       border: Border.all(color: borderColor),
       child: const Text('🎂', style: TextStyle(fontSize: 11)),

@@ -7,6 +7,7 @@ import '../../models/leave_record.dart';
 import '../../providers/employees_provider.dart';
 import '../../providers/leave_records_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/leave_utils.dart';
 
 class AddLeaveSheet extends ConsumerStatefulWidget {
   const AddLeaveSheet({super.key});
@@ -102,7 +103,40 @@ class _AddLeaveSheetState extends ConsumerState<AddLeaveSheet> {
   @override
   Widget build(BuildContext context) {
     final employees = ref.watch(employeesProvider);
+    final allLeaveRecords = ref.watch(leaveRecordsProvider);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    // Compute working-day summary when applicable.
+    final countsTowardBalance = _leaveType == LeaveType.annual ||
+        _leaveType == LeaveType.bankHoliday;
+    final effectiveEnd =
+        _leaveType == LeaveType.birthdayHoliday ? _fromDate : _toDate;
+    final selectedEmployee = _selectedEmployeeId == null
+        ? null
+        : employees.where((e) => e.id == _selectedEmployeeId).firstOrNull;
+    final showSummary = countsTowardBalance &&
+        selectedEmployee != null &&
+        _fromDate != null &&
+        effectiveEnd != null;
+
+    int calendarDays = 0;
+    int workingDays = 0;
+    if (showSummary) {
+      final empBankHolidays = allLeaveRecords
+          .where((r) =>
+              r.employeeId == selectedEmployee.id &&
+              r.type == LeaveType.bankHoliday)
+          .toList();
+      calendarDays =
+          effectiveEnd!.difference(_fromDate!).inDays + 1;
+      workingDays = countWorkingDays(
+        startDate: _fromDate!,
+        endDate: effectiveEnd,
+        weekendDays: selectedEmployee.weekendDays,
+        bankHolidayRecords:
+            _leaveType == LeaveType.annual ? empBankHolidays : const [],
+      );
+    }
 
     return Container(
       decoration: const BoxDecoration(
@@ -177,6 +211,15 @@ class _AddLeaveSheetState extends ConsumerState<AddLeaveSheet> {
                 value: _toDate,
                 hint: 'Select end date',
                 onTap: () => _pickDate(isFrom: false),
+              ),
+            ],
+
+            // Working-day summary
+            if (showSummary) ...[
+              const SizedBox(height: 12),
+              _WorkingDaySummary(
+                calendarDays: calendarDays,
+                workingDays: workingDays,
               ),
             ],
             const SizedBox(height: 28),
@@ -453,6 +496,59 @@ class _DateField extends StatelessWidget {
       'Dec',
     ];
     return names[month];
+  }
+}
+
+class _WorkingDaySummary extends StatelessWidget {
+  final int calendarDays;
+  final int workingDays;
+
+  const _WorkingDaySummary({
+    required this.calendarDays,
+    required this.workingDays,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final String calLabel =
+        '$calendarDays calendar ${calendarDays == 1 ? 'day' : 'days'}';
+    final String workLabel =
+        '$workingDays working ${workingDays == 1 ? 'day' : 'days'}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface2,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Text(
+            '$calLabel · ',
+            style: GoogleFonts.sora(
+              fontSize: 12,
+              color: AppColors.textMuted,
+            ),
+          ),
+          Text(
+            workLabel,
+            style: GoogleFonts.dmMono(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.annualLeave,
+            ),
+          ),
+          Text(
+            ' will be deducted',
+            style: GoogleFonts.sora(
+              fontSize: 12,
+              color: AppColors.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

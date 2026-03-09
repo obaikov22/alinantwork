@@ -21,6 +21,9 @@ class AppColors {
   static const birthday = Color(0xFFff9f45);
   static const bankHoliday = Color(0xFF45d4ff);
 
+  // Calendar cell colors
+  static const weekendCell = Color(0xFF2A2D3E);
+
   static const gradient = LinearGradient(
     colors: [gradientStart, gradientEnd],
     begin: Alignment.centerLeft,

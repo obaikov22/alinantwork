@@ -133,6 +133,7 @@ class FirestoreService {
         'color': e.color,
         'createdAt': e.createdAt.toIso8601String(),
         'role': e.role,
+        'weekendDays': e.weekendDays,
       };
 
   Employee _employeeFromMap(Map<String, dynamic> m) => Employee(
@@ -144,6 +145,7 @@ class FirestoreService {
         color: (m['color'] as num).toInt(),
         createdAt: DateTime.parse(m['createdAt'] as String),
         role: m['role'] as String?,
+        weekendDays: (m['weekendDays'] as List?)?.cast<int>() ?? [6, 7],
       );
 
   // ── Serialization: LeaveRecord ─────────────────────────────────────────────

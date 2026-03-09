@@ -8,6 +8,7 @@ import '../providers/employees_provider.dart';
 import '../providers/leave_records_provider.dart';
 import '../screens/team/edit_employee_sheet.dart';
 import '../theme/app_theme.dart';
+import '../utils/leave_utils.dart';
 
 class EmployeeCard extends ConsumerWidget {
   final Employee employee;
@@ -33,11 +34,30 @@ class EmployeeCard extends ConsumerWidget {
     final activeLeave = ref.watch(employeeActiveLeaveProvider(employee.id));
     final allRecords = ref.watch(leaveRecordsProvider);
     final total = employee.totalAnnualDays;
+
+    // Bank-holiday records for this employee — used to exclude those days
+    // when counting working days in annual-leave records.
+    final empBankHolidays = allRecords
+        .where((r) =>
+            r.employeeId == employee.id && r.type == LeaveType.bankHoliday)
+        .toList();
+
+    // Count only working days (no weekends, annual excludes bank holidays).
     final used = allRecords
         .where((r) =>
             r.employeeId == employee.id &&
             (r.type == LeaveType.annual || r.type == LeaveType.bankHoliday))
-        .fold<int>(0, (sum, r) => sum + r.durationDays);
+        .fold<int>(
+          0,
+          (sum, r) => sum +
+              countWorkingDays(
+                startDate: r.startDate,
+                endDate: r.endDate,
+                weekendDays: employee.weekendDays,
+                bankHolidayRecords:
+                    r.type == LeaveType.annual ? empBankHolidays : const [],
+              ),
+        );
     final remaining = (total - used).clamp(0, total);
     final progress = total > 0 ? (used / total).clamp(0.0, 1.0) : 0.0;
     final progressColor = _progressColor(remaining);

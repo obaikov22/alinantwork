@@ -23,6 +23,7 @@ class _AddEmployeeSheetState extends ConsumerState<AddEmployeeSheet> {
 
   DateTime? _birthday;
   int _selectedColorIndex = 0;
+  List<int> _weekendDays = [6, 7];
   bool _saving = false;
 
   @override
@@ -67,6 +68,7 @@ class _AddEmployeeSheetState extends ConsumerState<AddEmployeeSheet> {
       role: _roleController.text.trim().isEmpty
           ? null
           : _roleController.text.trim(),
+      weekendDays: _weekendDays,
     );
 
     await ref.read(employeesProvider.notifier).addEmployee(employee);
@@ -181,6 +183,15 @@ class _AddEmployeeSheetState extends ConsumerState<AddEmployeeSheet> {
               SheetColorPicker(
                 selectedIndex: _selectedColorIndex,
                 onSelect: (i) => setState(() => _selectedColorIndex = i),
+              ),
+              const SizedBox(height: 20),
+
+              // Weekend days
+              const SheetFieldLabel('Weekend Days'),
+              const SizedBox(height: 10),
+              SheetWeekendPicker(
+                selectedDays: _weekendDays,
+                onChanged: (days) => setState(() => _weekendDays = days),
               ),
               const SizedBox(height: 28),
 

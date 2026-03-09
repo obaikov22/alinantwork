@@ -215,6 +215,73 @@ class SheetColorPicker extends StatelessWidget {
   }
 }
 
+class SheetWeekendPicker extends StatelessWidget {
+  /// Selected days use Dart's DateTime.weekday values: Mon=1 … Sat=6, Sun=7.
+  final List<int> selectedDays;
+  final void Function(List<int>) onChanged;
+
+  const SheetWeekendPicker({
+    super.key,
+    required this.selectedDays,
+    required this.onChanged,
+  });
+
+  static const _labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  static const _values = [1, 2, 3, 4, 5, 6, 7];
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: List.generate(7, (i) {
+        final day = _values[i];
+        final selected = selectedDays.contains(day);
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: i < 6 ? 6 : 0),
+            child: GestureDetector(
+              onTap: () {
+                final updated = List<int>.from(selectedDays);
+                if (selected) {
+                  updated.remove(day);
+                } else {
+                  updated.add(day);
+                }
+                onChanged(updated);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                height: 36,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? AppColors.gradientStart.withValues(alpha: 0.18)
+                      : AppColors.surface2,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color:
+                        selected ? AppColors.gradientStart : AppColors.border,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    _labels[i],
+                    style: GoogleFonts.sora(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: selected
+                          ? AppColors.gradientStart
+                          : AppColors.textMuted,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
 class SheetGradientButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;

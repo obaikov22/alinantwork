@@ -28,6 +28,9 @@ class Employee extends HiveObject {
   @HiveField(7)
   String? role;
 
+  @HiveField(8)
+  List<int> weekendDays;
+
   Employee({
     required this.id,
     required this.name,
@@ -37,6 +40,7 @@ class Employee extends HiveObject {
     required this.color,
     required this.createdAt,
     this.role,
+    this.weekendDays = const [6, 7],
   });
 
   int get remainingAnnualDays => totalAnnualDays - usedAnnualDays;
@@ -50,6 +54,7 @@ class Employee extends HiveObject {
     int? color,
     DateTime? createdAt,
     String? role,
+    List<int>? weekendDays,
   }) {
     return Employee(
       id: id ?? this.id,
@@ -60,6 +65,7 @@ class Employee extends HiveObject {
       color: color ?? this.color,
       createdAt: createdAt ?? this.createdAt,
       role: role ?? this.role,
+      weekendDays: weekendDays ?? this.weekendDays,
     );
   }
 }
