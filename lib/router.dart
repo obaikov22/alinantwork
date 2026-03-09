@@ -9,10 +9,14 @@ import 'providers/leave_records_provider.dart';
 import 'providers/note_records_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/calendar/calendar_screen.dart';
+import 'screens/eula/eula_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/team/team_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/notes/notes_screen.dart';
+import 'screens/whats_new/whats_new_screen.dart';
+import 'services/eula_service.dart';
+import 'services/whats_new_service.dart';
 import 'theme/app_theme.dart';
 import 'widgets/update_banner.dart';
 
@@ -38,16 +42,43 @@ final _authRefresh = _GoRouterRefreshStream(
 
 final router = GoRouter(
   initialLocation: '/calendar',
-  refreshListenable: _authRefresh,
+  refreshListenable: Listenable.merge(
+      [_authRefresh, EulaService.instance, WhatsNewService.instance]),
   redirect: (context, state) {
+    // Gate 1: EULA
+    final eulaAccepted = EulaService.instance.accepted;
+    final goingToEula = state.matchedLocation == '/eula';
+    if (!eulaAccepted) {
+      return goingToEula ? null : '/eula';
+    }
+
+    // Gate 2: What's New
+    final showWhatsNew = WhatsNewService.instance.shouldShow;
+    final goingToWhatsNew = state.matchedLocation == '/whats-new';
+    if (showWhatsNew) {
+      return goingToWhatsNew ? null : '/whats-new';
+    }
+
+    // Gate 3: Auth
     final loggedIn = FirebaseAuth.instance.currentUser != null;
     final goingToLogin = state.matchedLocation == '/login';
-
     if (!loggedIn && !goingToLogin) return '/login';
     if (loggedIn && goingToLogin) return '/calendar';
     return null;
   },
   routes: [
+    GoRoute(
+      path: '/eula',
+      pageBuilder: (context, state) => const NoTransitionPage(
+        child: EulaScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/whats-new',
+      pageBuilder: (context, state) => const NoTransitionPage(
+        child: WhatsNewScreen(),
+      ),
+    ),
     GoRoute(
       path: '/login',
       pageBuilder: (context, state) => const NoTransitionPage(

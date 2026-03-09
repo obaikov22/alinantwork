@@ -7,10 +7,18 @@ import 'models/employee.dart';
 import 'models/leave_record.dart';
 import 'models/note_record.dart';
 import 'router.dart';
+import 'services/eula_service.dart';
+import 'services/whats_new_service.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize EULA state
+  await EulaService.instance.init();
+
+  // Initialize What's New state
+  await WhatsNewService.instance.init();
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);

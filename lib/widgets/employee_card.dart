@@ -211,6 +211,10 @@ class EmployeeCard extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -456,13 +460,13 @@ class _StatusBadge extends StatelessWidget {
 // Employee details sheet (read-only)
 // ---------------------------------------------------------------------------
 
-class _EmployeeDetailsSheet extends StatelessWidget {
+class _EmployeeDetailsSheet extends ConsumerWidget {
   final Employee employee;
   final int usedDays;
   const _EmployeeDetailsSheet({required this.employee, required this.usedDays});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final avatarColor = Color(employee.color);
     final remaining =
         (employee.totalAnnualDays - usedDays).clamp(0, employee.totalAnnualDays);
@@ -476,10 +480,24 @@ class _EmployeeDetailsSheet extends StatelessWidget {
       remainingColor = AppColors.sickLeave;
     }
 
-    return Padding(
+    final currentYear = DateTime.now().year;
+    final allRecords = ref.watch(leaveRecordsProvider);
+
+    final empBankHolidays = allRecords
+        .where((r) =>
+            r.employeeId == employee.id && r.type == LeaveType.bankHoliday)
+        .toList();
+
+    final yearRecords = allRecords
+        .where((r) =>
+            r.employeeId == employee.id &&
+            r.startDate.year == currentYear)
+        .toList()
+      ..sort((a, b) => b.startDate.compareTo(a.startDate));
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Handle
@@ -564,6 +582,45 @@ class _EmployeeDetailsSheet extends StatelessWidget {
             value: '$remaining days',
             valueColor: remainingColor,
           ),
+          const SizedBox(height: 24),
+          const Divider(color: AppColors.border, height: 1),
+          const SizedBox(height: 16),
+
+          // ── History section header ─────────────────────────────────────
+          Text(
+            'HISTORY $currentYear',
+            style: GoogleFonts.dmMono(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.0,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // ── History items ──────────────────────────────────────────────
+          if (yearRecords.isEmpty)
+            Text(
+              'No leave records for $currentYear',
+              style: GoogleFonts.sora(
+                fontSize: 13,
+                color: AppColors.textMuted,
+              ),
+            )
+          else
+            ...yearRecords.map((r) {
+              final workingDays = countWorkingDays(
+                startDate: r.startDate,
+                endDate: r.endDate,
+                weekendDays: employee.weekendDays,
+                bankHolidayRecords:
+                    r.type == LeaveType.annual ? empBankHolidays : const [],
+              );
+              return _HistoryItem(
+                record: r,
+                workingDays: workingDays,
+              );
+            }),
         ],
       ),
     );
@@ -611,6 +668,86 @@ class _DetailRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// History item
+// ---------------------------------------------------------------------------
+
+class _HistoryItem extends StatelessWidget {
+  final LeaveRecord record;
+  final int workingDays;
+
+  const _HistoryItem({required this.record, required this.workingDays});
+
+  @override
+  Widget build(BuildContext context) {
+    final (color, label) = switch (record.type) {
+      LeaveType.annual => (AppColors.annualLeave, 'Annual Leave'),
+      LeaveType.sick => (AppColors.sickLeave, 'Sick Leave'),
+      LeaveType.birthdayHoliday => (AppColors.gradientStart, 'Birthday Holiday'),
+      LeaveType.bankHoliday => (AppColors.bankHoliday, 'Bank Holiday'),
+    };
+
+    final isSameDay = record.startDate.year == record.endDate.year &&
+        record.startDate.month == record.endDate.month &&
+        record.startDate.day == record.endDate.day;
+
+    final fmt = DateFormat('d MMM');
+    final dateRange = isSameDay
+        ? fmt.format(record.startDate)
+        : '${fmt.format(record.startDate)} — ${fmt.format(record.endDate)}';
+
+    final daysLabel = '$workingDays ${workingDays == 1 ? 'day' : 'days'}';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.sora(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.text,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  dateRange,
+                  style: GoogleFonts.dmMono(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            daysLabel,
+            style: GoogleFonts.dmMono(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
