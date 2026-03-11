@@ -8,6 +8,8 @@ import '../../models/leave_record.dart';
 import '../../providers/employees_provider.dart';
 import '../../providers/leave_records_provider.dart';
 import '../../theme/app_theme.dart';
+import 'bins_sheet.dart';
+import 'radio_sheet.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -109,6 +111,28 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline, size: 22),
+            color: AppColors.textMuted,
+            tooltip: 'Bin Management',
+            onPressed: () => showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => const BinsSheet(),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.radio_outlined, size: 22),
+            color: AppColors.textMuted,
+            tooltip: 'Radio Numbers',
+            onPressed: () => showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => const RadioSheet(),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined, size: 22),
             color: AppColors.textMuted,

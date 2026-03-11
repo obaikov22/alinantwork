@@ -51,34 +51,16 @@ class WhatsNewScreen extends StatelessWidget {
                   child: Column(
                     children: const [
                       _ChangeItem(
-                        emoji: '🗓',
-                        title: 'Weekend highlighting',
+                        emoji: '🗑',
+                        title: 'Bin Management',
                         description:
-                            "Each employee's days off are now shown in the calendar grid",
+                            'New button on the dashboard — tap the bin icon to see and edit bin counts for each floor. Tap any floor to change the number.',
                       ),
                       _ChangeItem(
-                        emoji: '🎨',
-                        title: 'Brighter leave colors',
+                        emoji: '📻',
+                        title: 'Radio Numbers',
                         description:
-                            'Leave and sick day colors are now fully visible',
-                      ),
-                      _ChangeItem(
-                        emoji: '⚖️',
-                        title: 'Accurate leave balance',
-                        description:
-                            'Weekends and bank holidays are no longer counted against annual leave',
-                      ),
-                      _ChangeItem(
-                        emoji: '📋',
-                        title: 'Employee history',
-                        description:
-                            'Tap any employee card to see their full leave history for the year',
-                      ),
-                      _ChangeItem(
-                        emoji: '📜',
-                        title: 'Terms of use',
-                        description:
-                            'Added licence agreement on first launch',
+                            'New button on the dashboard — tap the radio icon to see radio numbers for your team. Tap any name to add or update their radio number.',
                       ),
                     ],
                   ),
