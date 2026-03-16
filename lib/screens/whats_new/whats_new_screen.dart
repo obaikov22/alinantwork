@@ -51,16 +51,10 @@ class WhatsNewScreen extends StatelessWidget {
                   child: Column(
                     children: const [
                       _ChangeItem(
-                        emoji: '🗑',
-                        title: 'Bin Management',
+                        emoji: '🔢',
+                        title: 'Leave balance fix',
                         description:
-                            'New button on the dashboard — tap the bin icon to see and edit bin counts for each floor. Tap any floor to change the number.',
-                      ),
-                      _ChangeItem(
-                        emoji: '📻',
-                        title: 'Radio Numbers',
-                        description:
-                            'New button on the dashboard — tap the radio icon to see radio numbers for your team. Tap any name to add or update their radio number.',
+                            'Fixed an issue where days were counted twice when a bank holiday or birthday holiday fell within an annual leave period. The balance now shows the correct number of unique days used.',
                       ),
                     ],
                   ),

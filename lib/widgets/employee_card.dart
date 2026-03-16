@@ -35,29 +35,18 @@ class EmployeeCard extends ConsumerWidget {
     final allRecords = ref.watch(leaveRecordsProvider);
     final total = employee.totalAnnualDays;
 
-    // Bank-holiday records for this employee — used to exclude those days
-    // when counting working days in annual-leave records.
-    final empBankHolidays = allRecords
-        .where((r) =>
-            r.employeeId == employee.id && r.type == LeaveType.bankHoliday)
-        .toList();
-
-    // Count only working days (no weekends, annual excludes bank holidays).
-    final used = allRecords
-        .where((r) =>
-            r.employeeId == employee.id &&
-            (r.type == LeaveType.annual || r.type == LeaveType.bankHoliday))
-        .fold<int>(
-          0,
-          (sum, r) => sum +
-              countWorkingDays(
-                startDate: r.startDate,
-                endDate: r.endDate,
-                weekendDays: employee.weekendDays,
-                bankHolidayRecords:
-                    r.type == LeaveType.annual ? empBankHolidays : const [],
-              ),
-        );
+    // Count unique working days across all deductible records (annual +
+    // bankHoliday). Using a set-based approach ensures overlapping records
+    // (e.g. a bank holiday that falls inside an annual leave span) are never
+    // counted twice.
+    final used = countUniqueWorkingDays(
+      records: allRecords
+          .where((r) =>
+              r.employeeId == employee.id &&
+              (r.type == LeaveType.annual || r.type == LeaveType.bankHoliday))
+          .toList(),
+      weekendDays: employee.weekendDays,
+    );
     final remaining = (total - used).clamp(0, total);
     final progress = total > 0 ? (used / total).clamp(0.0, 1.0) : 0.0;
     final progressColor = _progressColor(remaining);
