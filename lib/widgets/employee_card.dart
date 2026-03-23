@@ -35,15 +35,10 @@ class EmployeeCard extends ConsumerWidget {
     final allRecords = ref.watch(leaveRecordsProvider);
     final total = employee.totalAnnualDays;
 
-    // Count unique working days across all deductible records (annual +
-    // bankHoliday). Using a set-based approach ensures overlapping records
-    // (e.g. a bank holiday that falls inside an annual leave span) are never
-    // counted twice.
     final used = countUniqueWorkingDays(
       records: allRecords
           .where((r) =>
-              r.employeeId == employee.id &&
-              (r.type == LeaveType.annual || r.type == LeaveType.bankHoliday))
+              r.employeeId == employee.id && r.type == LeaveType.annual)
           .toList(),
       weekendDays: employee.weekendDays,
     );
@@ -472,11 +467,6 @@ class _EmployeeDetailsSheet extends ConsumerWidget {
     final currentYear = DateTime.now().year;
     final allRecords = ref.watch(leaveRecordsProvider);
 
-    final empBankHolidays = allRecords
-        .where((r) =>
-            r.employeeId == employee.id && r.type == LeaveType.bankHoliday)
-        .toList();
-
     final yearRecords = allRecords
         .where((r) =>
             r.employeeId == employee.id &&
@@ -602,8 +592,6 @@ class _EmployeeDetailsSheet extends ConsumerWidget {
                 startDate: r.startDate,
                 endDate: r.endDate,
                 weekendDays: employee.weekendDays,
-                bankHolidayRecords:
-                    r.type == LeaveType.annual ? empBankHolidays : const [],
               );
               return _HistoryItem(
                 record: r,

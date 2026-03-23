@@ -122,19 +122,11 @@ class _AddLeaveSheetState extends ConsumerState<AddLeaveSheet> {
     int calendarDays = 0;
     int workingDays = 0;
     if (showSummary) {
-      final empBankHolidays = allLeaveRecords
-          .where((r) =>
-              r.employeeId == selectedEmployee.id &&
-              r.type == LeaveType.bankHoliday)
-          .toList();
-      calendarDays =
-          effectiveEnd!.difference(_fromDate!).inDays + 1;
+      calendarDays = effectiveEnd!.difference(_fromDate!).inDays + 1;
       workingDays = countWorkingDays(
         startDate: _fromDate!,
         endDate: effectiveEnd,
         weekendDays: selectedEmployee.weekendDays,
-        bankHolidayRecords:
-            _leaveType == LeaveType.annual ? empBankHolidays : const [],
       );
     }
 
