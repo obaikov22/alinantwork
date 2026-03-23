@@ -51,10 +51,10 @@ class WhatsNewScreen extends StatelessWidget {
                   child: Column(
                     children: const [
                       _ChangeItem(
-                        emoji: '🔢',
-                        title: 'Leave balance fix',
+                        emoji: '📅',
+                        title: 'Только отпуск идёт в счёт',
                         description:
-                            'Fixed an issue where days were counted twice when a bank holiday or birthday holiday fell within an annual leave period. The balance now shows the correct number of unique days used.',
+                            'Теперь из 20 дней вычитается только ежегодный отпуск. Больничные, праздники и день рождения видны в истории, но на баланс не влияют.',
                       ),
                     ],
                   ),
