@@ -52,9 +52,9 @@ class WhatsNewScreen extends StatelessWidget {
                     children: const [
                       _ChangeItem(
                         emoji: '📅',
-                        title: 'Только отпуск идёт в счёт',
+                        title: 'Only annual leave counts',
                         description:
-                            'Теперь из 20 дней вычитается только ежегодный отпуск. Больничные, праздники и день рождения видны в истории, но на баланс не влияют.',
+                            'Only annual leave now counts toward the 20-day balance. Sick leave, bank holidays, and birthday holidays still show in the calendar and history, but don\'t affect the balance.',
                       ),
                     ],
                   ),
