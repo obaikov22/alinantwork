@@ -7,6 +7,7 @@ import '../../models/leave_record.dart';
 import '../../providers/employees_provider.dart';
 import '../../providers/leave_records_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/calendar_date.dart';
 import '../../utils/leave_utils.dart';
 
 class AddLeaveSheet extends ConsumerStatefulWidget {
@@ -26,9 +27,7 @@ class _AddLeaveSheetState extends ConsumerState<AddLeaveSheet> {
   Future<void> _pickDate({required bool isFrom}) async {
     FocusScope.of(context).unfocus();
     final now = DateTime.now();
-    final initial = isFrom
-        ? (_fromDate ?? now)
-        : (_toDate ?? _fromDate ?? now);
+    final initial = isFrom ? (_fromDate ?? now) : (_toDate ?? _fromDate ?? now);
 
     final picked = await showDatePicker(
       context: context,
@@ -103,18 +102,18 @@ class _AddLeaveSheetState extends ConsumerState<AddLeaveSheet> {
   @override
   Widget build(BuildContext context) {
     final employees = ref.watch(employeesProvider);
-    final allLeaveRecords = ref.watch(leaveRecordsProvider);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     // Compute working-day summary when applicable.
-    final countsTowardBalance = _leaveType == LeaveType.annual ||
-        _leaveType == LeaveType.bankHoliday;
-    final effectiveEnd =
-        _leaveType == LeaveType.birthdayHoliday ? _fromDate : _toDate;
+    final countsTowardBalance = _leaveType == LeaveType.annual;
+    final effectiveEnd = _leaveType == LeaveType.birthdayHoliday
+        ? _fromDate
+        : _toDate;
     final selectedEmployee = _selectedEmployeeId == null
         ? null
         : employees.where((e) => e.id == _selectedEmployeeId).firstOrNull;
-    final showSummary = countsTowardBalance &&
+    final showSummary =
+        countsTowardBalance &&
         selectedEmployee != null &&
         _fromDate != null &&
         effectiveEnd != null;
@@ -122,7 +121,7 @@ class _AddLeaveSheetState extends ConsumerState<AddLeaveSheet> {
     int calendarDays = 0;
     int workingDays = 0;
     if (showSummary) {
-      calendarDays = effectiveEnd!.difference(_fromDate!).inDays + 1;
+      calendarDays = calendarDayDifference(_fromDate!, effectiveEnd) + 1;
       workingDays = countWorkingDays(
         startDate: _fromDate!,
         endDate: effectiveEnd,
@@ -187,7 +186,9 @@ class _AddLeaveSheetState extends ConsumerState<AddLeaveSheet> {
             const SizedBox(height: 16),
 
             // From date
-            _FieldLabel(_leaveType == LeaveType.birthdayHoliday ? 'Date' : 'From'),
+            _FieldLabel(
+              _leaveType == LeaveType.birthdayHoliday ? 'Date' : 'From',
+            ),
             const SizedBox(height: 6),
             _DateField(
               value: _fromDate,
@@ -308,8 +309,7 @@ class _EmployeeDropdown extends StatelessWidget {
                 value: emp.id,
                 child: Text(
                   emp.name,
-                  style:
-                      GoogleFonts.sora(fontSize: 14, color: AppColors.text),
+                  style: GoogleFonts.sora(fontSize: 14, color: AppColors.text),
                 ),
               ),
             )
@@ -455,8 +455,9 @@ class _DateField extends StatelessWidget {
                 formatted ?? hint,
                 style: GoogleFonts.sora(
                   fontSize: 14,
-                  color:
-                      formatted != null ? AppColors.text : AppColors.textMuted,
+                  color: formatted != null
+                      ? AppColors.text
+                      : AppColors.textMuted,
                 ),
               ),
             ),
@@ -518,10 +519,7 @@ class _WorkingDaySummary extends StatelessWidget {
         children: [
           Text(
             '$calLabel · ',
-            style: GoogleFonts.sora(
-              fontSize: 12,
-              color: AppColors.textMuted,
-            ),
+            style: GoogleFonts.sora(fontSize: 12, color: AppColors.textMuted),
           ),
           Text(
             workLabel,
@@ -533,10 +531,7 @@ class _WorkingDaySummary extends StatelessWidget {
           ),
           Text(
             ' will be deducted',
-            style: GoogleFonts.sora(
-              fontSize: 12,
-              color: AppColors.textMuted,
-            ),
+            style: GoogleFonts.sora(fontSize: 12, color: AppColors.textMuted),
           ),
         ],
       ),

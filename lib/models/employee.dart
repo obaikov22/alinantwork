@@ -35,7 +35,7 @@ class Employee extends HiveObject {
     required this.id,
     required this.name,
     required this.birthday,
-    this.totalAnnualDays = 28,
+    this.totalAnnualDays = 20,
     this.usedAnnualDays = 0,
     required this.color,
     required this.createdAt,

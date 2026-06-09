@@ -19,7 +19,7 @@ class _AddEmployeeSheetState extends ConsumerState<AddEmployeeSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _roleController = TextEditingController();
-  final _daysController = TextEditingController(text: '28');
+  final _daysController = TextEditingController(text: '20');
 
   DateTime? _birthday;
   int _selectedColorIndex = 0;
@@ -61,7 +61,7 @@ class _AddEmployeeSheetState extends ConsumerState<AddEmployeeSheet> {
       id: const Uuid().v4(),
       name: _nameController.text.trim(),
       birthday: _birthday!,
-      totalAnnualDays: int.tryParse(_daysController.text) ?? 28,
+      totalAnnualDays: int.tryParse(_daysController.text) ?? 20,
       usedAnnualDays: 0,
       color: kAvatarColors[_selectedColorIndex].toARGB32(),
       createdAt: DateTime.now(),
@@ -143,10 +143,7 @@ class _AddEmployeeSheetState extends ConsumerState<AddEmployeeSheet> {
               // Birthday
               const SheetFieldLabel('Birthday'),
               const SizedBox(height: 6),
-              SheetDatePickerField(
-                value: _birthday,
-                onTap: _pickBirthday,
-              ),
+              SheetDatePickerField(value: _birthday, onTap: _pickBirthday),
               const SizedBox(height: 16),
 
               // Annual Days
@@ -154,7 +151,7 @@ class _AddEmployeeSheetState extends ConsumerState<AddEmployeeSheet> {
               const SizedBox(height: 6),
               SheetInputField(
                 controller: _daysController,
-                hint: '28',
+                hint: '20',
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (v) {

@@ -8,6 +8,7 @@ import '../../models/leave_record.dart';
 import '../../providers/employees_provider.dart';
 import '../../providers/leave_records_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/calendar_date.dart';
 import 'bins_sheet.dart';
 import 'radio_sheet.dart';
 
@@ -47,10 +48,10 @@ class DashboardScreen extends ConsumerWidget {
     final awayCount = awayNow.length;
     final sickCount = sickNow.length;
 
-    final sevenDaysLater = today.add(const Duration(days: 7));
+    final sevenDaysLater = addCalendarDays(today, 7);
     final soonIds = <String>{};
     for (final r in records) {
-      final start = DateTime(r.startDate.year, r.startDate.month, r.startDate.day);
+      final start = dateOnly(r.startDate);
       if (start.isAfter(today) && !start.isAfter(sevenDaysLater)) {
         soonIds.add(r.employeeId);
       }
@@ -60,9 +61,13 @@ class DashboardScreen extends ConsumerWidget {
     // --- Conflict: first day in next 14 days with 3+ employees on leave ---
     ({DateTime date, int count})? conflict;
     for (var i = 0; i < 14 && conflict == null; i++) {
-      final day = today.add(Duration(days: i));
+      final day = addCalendarDays(today, i);
       final onLeave = employees
-          .where((emp) => records.any((r) => r.employeeId == emp.id && r.containsDate(day)))
+          .where(
+            (emp) => records.any(
+              (r) => r.employeeId == emp.id && r.containsDate(day),
+            ),
+          )
           .length;
       if (onLeave >= 3) conflict = (date: day, count: onLeave);
     }
@@ -70,7 +75,7 @@ class DashboardScreen extends ConsumerWidget {
     // --- Upcoming leave (starts after today, within 7 days) ---
     final upcomingLeave = <(Employee, LeaveRecord)>[];
     for (final r in records) {
-      final start = DateTime(r.startDate.year, r.startDate.month, r.startDate.day);
+      final start = dateOnly(r.startDate);
       if (start.isAfter(today) && !start.isAfter(sevenDaysLater)) {
         final emp = employees.where((e) => e.id == r.employeeId).firstOrNull;
         if (emp != null) upcomingLeave.add((emp, r));
@@ -85,7 +90,7 @@ class DashboardScreen extends ConsumerWidget {
       if (bday.isBefore(today)) {
         bday = DateTime(today.year + 1, emp.birthday.month, emp.birthday.day);
       }
-      final daysUntil = bday.difference(today).inDays;
+      final daysUntil = calendarDayDifference(today, bday);
       if (daysUntil >= 0 && daysUntil <= 30) {
         upcomingBirthdays.add((emp, bday, daysUntil));
       }
@@ -201,8 +206,8 @@ class DashboardScreen extends ConsumerWidget {
             else ...[
               ...awayNow.map((pair) {
                 final (emp, rec) = pair;
-                final returnsDate = rec.endDate.add(const Duration(days: 1));
-                final daysLeft = rec.endDate.difference(today).inDays + 1;
+                final returnsDate = addCalendarDays(rec.endDate, 1);
+                final daysLeft = calendarDayDifference(today, rec.endDate) + 1;
                 final isBankHoliday = rec.type == LeaveType.bankHoliday;
                 final accentColor = isBankHoliday
                     ? AppColors.bankHoliday
@@ -219,7 +224,7 @@ class DashboardScreen extends ConsumerWidget {
               }),
               ...birthdayHolidayNow.map((pair) {
                 final (emp, rec) = pair;
-                final returnsDate = rec.endDate.add(const Duration(days: 1));
+                final returnsDate = addCalendarDays(rec.endDate, 1);
                 return _PersonCard(
                   employee: emp,
                   accentColor: AppColors.gradientStart,
@@ -265,12 +270,8 @@ class DashboardScreen extends ConsumerWidget {
             else
               ...upcomingLeave.map((pair) {
                 final (emp, rec) = pair;
-                final start = DateTime(
-                  rec.startDate.year,
-                  rec.startDate.month,
-                  rec.startDate.day,
-                );
-                final daysUntil = start.difference(today).inDays;
+                final start = dateOnly(rec.startDate);
+                final daysUntil = calendarDayDifference(today, start);
                 final dur = rec.durationDays;
                 return _PersonCard(
                   employee: emp,
@@ -278,7 +279,8 @@ class DashboardScreen extends ConsumerWidget {
                   subtitle:
                       'Starts ${DateFormat('d MMM').format(rec.startDate)} · '
                       '$dur ${dur == 1 ? 'day' : 'days'}',
-                  badgeLabel: 'In $daysUntil ${daysUntil == 1 ? 'day' : 'days'}',
+                  badgeLabel:
+                      'In $daysUntil ${daysUntil == 1 ? 'day' : 'days'}',
                   badgeColor: AppColors.birthday,
                 );
               }),
@@ -393,9 +395,7 @@ class _ConflictCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.birthday.withValues(alpha: 0.078),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.birthday.withValues(alpha: 0.208),
-        ),
+        border: Border.all(color: AppColors.birthday.withValues(alpha: 0.208)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

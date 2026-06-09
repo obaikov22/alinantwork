@@ -33,14 +33,14 @@ class EmployeeCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final activeLeave = ref.watch(employeeActiveLeaveProvider(employee.id));
     final allRecords = ref.watch(leaveRecordsProvider);
+    final currentYear = DateTime.now().year;
     final total = employee.totalAnnualDays;
 
-    final used = countUniqueWorkingDays(
-      records: allRecords
-          .where((r) =>
-              r.employeeId == employee.id && r.type == LeaveType.annual)
-          .toList(),
+    final used = countDeductibleAnnualLeaveDays(
+      records: allRecords,
+      employeeId: employee.id,
       weekendDays: employee.weekendDays,
+      year: currentYear,
     );
     final remaining = (total - used).clamp(0, total);
     final progress = total > 0 ? (used / total).clamp(0.0, 1.0) : 0.0;
@@ -238,8 +238,7 @@ class EmployeeCard extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Remove ${employee.name}?',
           style: GoogleFonts.sora(
@@ -257,10 +256,7 @@ class EmployeeCard extends ConsumerWidget {
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(
               'Cancel',
-              style: GoogleFonts.sora(
-                fontSize: 14,
-                color: AppColors.textMuted,
-              ),
+              style: GoogleFonts.sora(fontSize: 14, color: AppColors.textMuted),
             ),
           ),
           TextButton(
@@ -269,9 +265,7 @@ class EmployeeCard extends ConsumerWidget {
               ref
                   .read(leaveRecordsProvider.notifier)
                   .removeAllForEmployee(employee.id);
-              ref
-                  .read(employeesProvider.notifier)
-                  .removeEmployee(employee.id);
+              ref.read(employeesProvider.notifier).removeEmployee(employee.id);
             },
             child: Text(
               'Delete',
@@ -452,8 +446,10 @@ class _EmployeeDetailsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final avatarColor = Color(employee.color);
-    final remaining =
-        (employee.totalAnnualDays - usedDays).clamp(0, employee.totalAnnualDays);
+    final remaining = (employee.totalAnnualDays - usedDays).clamp(
+      0,
+      employee.totalAnnualDays,
+    );
 
     Color remainingColor;
     if (remaining > 10) {
@@ -467,12 +463,16 @@ class _EmployeeDetailsSheet extends ConsumerWidget {
     final currentYear = DateTime.now().year;
     final allRecords = ref.watch(leaveRecordsProvider);
 
-    final yearRecords = allRecords
-        .where((r) =>
-            r.employeeId == employee.id &&
-            r.startDate.year == currentYear)
-        .toList()
-      ..sort((a, b) => b.startDate.compareTo(a.startDate));
+    final yearRecords =
+        allRecords
+            .where(
+              (r) =>
+                  r.employeeId == employee.id &&
+                  r.startDate.year <= currentYear &&
+                  r.endDate.year >= currentYear,
+            )
+            .toList()
+          ..sort((a, b) => b.startDate.compareTo(a.startDate));
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
@@ -581,10 +581,7 @@ class _EmployeeDetailsSheet extends ConsumerWidget {
           if (yearRecords.isEmpty)
             Text(
               'No leave records for $currentYear',
-              style: GoogleFonts.sora(
-                fontSize: 13,
-                color: AppColors.textMuted,
-              ),
+              style: GoogleFonts.sora(fontSize: 13, color: AppColors.textMuted),
             )
           else
             ...yearRecords.map((r) {
@@ -593,10 +590,7 @@ class _EmployeeDetailsSheet extends ConsumerWidget {
                 endDate: r.endDate,
                 weekendDays: employee.weekendDays,
               );
-              return _HistoryItem(
-                record: r,
-                workingDays: workingDays,
-              );
+              return _HistoryItem(record: r, workingDays: workingDays);
             }),
         ],
       ),
@@ -630,10 +624,7 @@ class _DetailRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.sora(
-              fontSize: 13,
-              color: AppColors.textMuted,
-            ),
+            style: GoogleFonts.sora(fontSize: 13, color: AppColors.textMuted),
           ),
         ),
         Text(
@@ -664,11 +655,15 @@ class _HistoryItem extends StatelessWidget {
     final (color, label) = switch (record.type) {
       LeaveType.annual => (AppColors.annualLeave, 'Annual Leave'),
       LeaveType.sick => (AppColors.sickLeave, 'Sick Leave'),
-      LeaveType.birthdayHoliday => (AppColors.gradientStart, 'Birthday Holiday'),
+      LeaveType.birthdayHoliday => (
+        AppColors.gradientStart,
+        'Birthday Holiday',
+      ),
       LeaveType.bankHoliday => (AppColors.bankHoliday, 'Bank Holiday'),
     };
 
-    final isSameDay = record.startDate.year == record.endDate.year &&
+    final isSameDay =
+        record.startDate.year == record.endDate.year &&
         record.startDate.month == record.endDate.month &&
         record.startDate.day == record.endDate.day;
 
@@ -686,10 +681,7 @@ class _HistoryItem extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 10),
           Expanded(

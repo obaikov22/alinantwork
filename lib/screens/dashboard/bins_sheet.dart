@@ -47,19 +47,19 @@ class _BinsSheetState extends State<BinsSheet> {
     }
   }
 
-  Future<void> _editBinCount(
-      String id, String floorName, int current) async {
+  Future<void> _editBinCount(String id, String floorName, int current) async {
     final ctrl = TextEditingController(text: '$current');
     final result = await showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           floorName,
           style: GoogleFonts.sora(
-              color: AppColors.text, fontWeight: FontWeight.w700),
+            color: AppColors.text,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         content: TextField(
           controller: ctrl,
@@ -83,8 +83,10 @@ class _BinsSheetState extends State<BinsSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: GoogleFonts.sora(color: AppColors.textMuted)),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.sora(color: AppColors.textMuted),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -94,9 +96,13 @@ class _BinsSheetState extends State<BinsSheet> {
             child: ShaderMask(
               shaderCallback: (b) => AppColors.gradient.createShader(b),
               blendMode: BlendMode.srcIn,
-              child: Text('Save',
-                  style: GoogleFonts.sora(
-                      fontWeight: FontWeight.w700, color: Colors.white)),
+              child: Text(
+                'Save',
+                style: GoogleFonts.sora(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],
@@ -114,12 +120,13 @@ class _BinsSheetState extends State<BinsSheet> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Add Floor',
           style: GoogleFonts.sora(
-              color: AppColors.text, fontWeight: FontWeight.w700),
+            color: AppColors.text,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -165,8 +172,10 @@ class _BinsSheetState extends State<BinsSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: GoogleFonts.sora(color: AppColors.textMuted)),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.sora(color: AppColors.textMuted),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -177,9 +186,13 @@ class _BinsSheetState extends State<BinsSheet> {
             child: ShaderMask(
               shaderCallback: (b) => AppColors.gradient.createShader(b),
               blendMode: BlendMode.srcIn,
-              child: Text('Add',
-                  style: GoogleFonts.sora(
-                      fontWeight: FontWeight.w700, color: Colors.white)),
+              child: Text(
+                'Add',
+                style: GoogleFonts.sora(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],
@@ -195,7 +208,8 @@ class _BinsSheetState extends State<BinsSheet> {
   Widget build(BuildContext context) {
     final maxHeight = MediaQuery.of(context).size.height * 0.85;
     final bottomPad =
-        MediaQuery.of(context).padding.bottom + MediaQuery.of(context).viewInsets.bottom;
+        MediaQuery.of(context).padding.bottom +
+        MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -250,61 +264,68 @@ class _BinsSheetState extends State<BinsSheet> {
                     child: Center(child: CircularProgressIndicator()),
                   )
                 : _floors!.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.all(40),
-                        child: Center(
-                          child: Text(
-                            'No floors added yet',
-                            style: GoogleFonts.sora(
-                                color: AppColors.textMuted),
+                ? Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Center(
+                      child: Text(
+                        'No floors added yet',
+                        style: GoogleFonts.sora(color: AppColors.textMuted),
+                      ),
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shrinkWrap: true,
+                    itemCount: _floors!.length,
+                    separatorBuilder: (_, _) => Divider(
+                      color: AppColors.border,
+                      height: 1,
+                      indent: 16,
+                      endIndent: 16,
+                    ),
+                    itemBuilder: (ctx, i) {
+                      final floor = _floors![i];
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 4,
+                        ),
+                        title: Text(
+                          floor.floorName,
+                          style: GoogleFonts.sora(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.text,
                           ),
                         ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        shrinkWrap: true,
-                        itemCount: _floors!.length,
-                        separatorBuilder: (_, __) => Divider(
-                          color: AppColors.border,
-                          height: 1,
-                          indent: 16,
-                          endIndent: 16,
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.gradientStart.withValues(
+                              alpha: 0.15,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${floor.binCount}',
+                            style: GoogleFonts.dmMono(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.gradientStart,
+                            ),
+                          ),
                         ),
-                        itemBuilder: (ctx, i) {
-                          final floor = _floors![i];
-                          return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 4),
-                            title: Text(
-                              floor.floorName,
-                              style: GoogleFonts.sora(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.text,
-                              ),
-                            ),
-                            trailing: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: AppColors.gradientStart
-                                    .withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '${floor.binCount}',
-                                style: GoogleFonts.dmMono(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.gradientStart,
-                                ),
-                              ),
-                            ),
-                            onTap: () => _editBinCount(
-                                floor.id, floor.floorName, floor.binCount),
-                          );
-                        },
-                      ),
+                        onTap: () => _editBinCount(
+                          floor.id,
+                          floor.floorName,
+                          floor.binCount,
+                        ),
+                      );
+                    },
+                  ),
           ),
 
           // Add Floor button

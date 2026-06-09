@@ -17,12 +17,12 @@ A mobile app for managing a team's annual leave, sick days, bank holidays, and b
 
 ## Leave Types
 
-| Type | Color | Counts toward 28 days |
+| Type | Color | Counts toward 20 days |
 |------|-------|----------------------|
 | 🌴 Annual Leave | Mint | ✅ Yes |
 | 🤒 Sick Leave | Rose | ❌ No |
 | 🎂 Birthday Holiday | Purple | ❌ No |
-| 🏦 Bank Holiday | Cyan | ✅ Yes |
+| 🏦 Bank Holiday | Cyan | ❌ No |
 
 ## Tech Stack
 

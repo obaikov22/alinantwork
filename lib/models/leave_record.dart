@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+import '../utils/calendar_date.dart';
+
 part 'leave_record.g.dart';
 
 @HiveType(typeId: 1)
@@ -47,13 +49,13 @@ class LeaveRecord extends HiveObject {
   });
 
   int get durationDays {
-    return endDate.difference(startDate).inDays + 1;
+    return calendarDayDifference(startDate, endDate) + 1;
   }
 
   bool containsDate(DateTime date) {
-    final d = DateTime(date.year, date.month, date.day);
-    final start = DateTime(startDate.year, startDate.month, startDate.day);
-    final end = DateTime(endDate.year, endDate.month, endDate.day);
+    final d = dateOnly(date);
+    final start = dateOnly(startDate);
+    final end = dateOnly(endDate);
     return !d.isBefore(start) && !d.isAfter(end);
   }
 

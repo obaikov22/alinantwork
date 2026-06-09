@@ -7,6 +7,7 @@ import '../../models/note_record.dart';
 import '../../providers/employees_provider.dart';
 import '../../providers/note_records_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/calendar_date.dart';
 import 'add_note_sheet.dart';
 
 class NotesScreen extends ConsumerStatefulWidget {
@@ -29,14 +30,14 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   }
 
   void _prevMonth() => setState(() {
-        _displayMonth = DateTime(_displayMonth.year, _displayMonth.month - 1);
-        _selectedDay = _displayMonth;
-      });
+    _displayMonth = DateTime(_displayMonth.year, _displayMonth.month - 1);
+    _selectedDay = _displayMonth;
+  });
 
   void _nextMonth() => setState(() {
-        _displayMonth = DateTime(_displayMonth.year, _displayMonth.month + 1);
-        _selectedDay = _displayMonth;
-      });
+    _displayMonth = DateTime(_displayMonth.year, _displayMonth.month + 1);
+    _selectedDay = _displayMonth;
+  });
 
   void _onDayTapped(DateTime day) {
     setState(() => _selectedDay = day);
@@ -104,14 +105,15 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     final allNotes = ref.watch(noteRecordsProvider);
     final employees = ref.watch(employeesProvider);
 
-    final monthNotes = allNotes
-        .where(
-          (n) =>
-              n.date.year == _displayMonth.year &&
-              n.date.month == _displayMonth.month,
-        )
-        .toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    final monthNotes =
+        allNotes
+            .where(
+              (n) =>
+                  n.date.year == _displayMonth.year &&
+                  n.date.month == _displayMonth.month,
+            )
+            .toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
 
     final daysWithNotes = {for (final n in monthNotes) n.date.day};
     final employeeMap = {for (final e in employees) e.id: e};
@@ -171,7 +173,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
                     itemCount: monthNotes.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 8),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 8),
                     itemBuilder: (_, i) {
                       final note = monthNotes[i];
                       return _NoteItem(
@@ -217,12 +220,15 @@ class _MonthCalendar extends StatelessWidget {
   List<DateTime> _buildCells() {
     final first = DateTime(displayMonth.year, displayMonth.month, 1);
     final leadingDays = first.weekday - 1; // 0 = Monday
-    final daysInMonth = DateUtils.getDaysInMonth(displayMonth.year, displayMonth.month);
+    final daysInMonth = DateUtils.getDaysInMonth(
+      displayMonth.year,
+      displayMonth.month,
+    );
 
     final cells = <DateTime>[];
 
     for (int i = leadingDays; i > 0; i--) {
-      cells.add(first.subtract(Duration(days: i)));
+      cells.add(addCalendarDays(first, -i));
     }
 
     for (int i = 1; i <= daysInMonth; i++) {
@@ -305,16 +311,20 @@ class _MonthCalendar extends StatelessWidget {
             itemCount: cells.length,
             itemBuilder: (_, index) {
               final date = cells[index];
-              final isCurrentMonth = date.month == displayMonth.month &&
+              final isCurrentMonth =
+                  date.month == displayMonth.month &&
                   date.year == displayMonth.year;
-              final isToday = date.year == today.year &&
+              final isToday =
+                  date.year == today.year &&
                   date.month == today.month &&
                   date.day == today.day;
-              final isSelected = isCurrentMonth &&
+              final isSelected =
+                  isCurrentMonth &&
                   date.year == selectedDay.year &&
                   date.month == selectedDay.month &&
                   date.day == selectedDay.day;
-              final hasNotes = isCurrentMonth && daysWithNotes.contains(date.day);
+              final hasNotes =
+                  isCurrentMonth && daysWithNotes.contains(date.day);
 
               return _DayCell(
                 date: date,
@@ -430,7 +440,9 @@ class _NoteItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isGeneral = note.type == NoteType.general;
-    final accentColor = isGeneral ? AppColors.gradientStart : AppColors.gradientEnd;
+    final accentColor = isGeneral
+        ? AppColors.gradientStart
+        : AppColors.gradientEnd;
     final dateLabel = DateFormat('d MMM').format(note.date);
 
     return GestureDetector(

@@ -52,12 +52,13 @@ class _RadioSheetState extends ConsumerState<RadioSheet> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           emp.name,
           style: GoogleFonts.sora(
-              color: AppColors.text, fontWeight: FontWeight.w700),
+            color: AppColors.text,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         content: TextField(
           controller: ctrl,
@@ -67,8 +68,9 @@ class _RadioSheetState extends ConsumerState<RadioSheet> {
             labelText: 'Radio number',
             labelStyle: GoogleFonts.sora(color: AppColors.textMuted),
             hintText: 'e.g. CH01, R-12',
-            hintStyle:
-                GoogleFonts.sora(color: AppColors.textMuted.withValues(alpha: 0.5)),
+            hintStyle: GoogleFonts.sora(
+              color: AppColors.textMuted.withValues(alpha: 0.5),
+            ),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(color: AppColors.border),
               borderRadius: BorderRadius.circular(10),
@@ -82,17 +84,23 @@ class _RadioSheetState extends ConsumerState<RadioSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: GoogleFonts.sora(color: AppColors.textMuted)),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.sora(color: AppColors.textMuted),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
             child: ShaderMask(
               shaderCallback: (b) => AppColors.gradient.createShader(b),
               blendMode: BlendMode.srcIn,
-              child: Text('Save',
-                  style: GoogleFonts.sora(
-                      fontWeight: FontWeight.w700, color: Colors.white)),
+              child: Text(
+                'Save',
+                style: GoogleFonts.sora(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],
@@ -166,73 +174,74 @@ class _RadioSheetState extends ConsumerState<RadioSheet> {
                     child: Center(child: CircularProgressIndicator()),
                   )
                 : sorted.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.all(40),
-                        child: Center(
-                          child: Text(
-                            'No employees yet',
-                            style: GoogleFonts.sora(
-                                color: AppColors.textMuted),
+                ? Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Center(
+                      child: Text(
+                        'No employees yet',
+                        style: GoogleFonts.sora(color: AppColors.textMuted),
+                      ),
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shrinkWrap: true,
+                    itemCount: sorted.length,
+                    separatorBuilder: (_, _) => Divider(
+                      color: AppColors.border,
+                      height: 1,
+                      indent: 16,
+                      endIndent: 16,
+                    ),
+                    itemBuilder: (ctx, i) {
+                      final emp = sorted[i];
+                      final radioNum = _radioNumbers?[emp.id];
+                      final avatarColor = Color(emp.color);
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 4,
+                        ),
+                        leading: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: avatarColor.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              _initials(emp.name),
+                              style: GoogleFonts.sora(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: avatarColor,
+                              ),
+                            ),
                           ),
                         ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        shrinkWrap: true,
-                        itemCount: sorted.length,
-                        separatorBuilder: (_, __) => Divider(
-                          color: AppColors.border,
-                          height: 1,
-                          indent: 16,
-                          endIndent: 16,
+                        title: Text(
+                          emp.name,
+                          style: GoogleFonts.sora(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.text,
+                          ),
                         ),
-                        itemBuilder: (ctx, i) {
-                          final emp = sorted[i];
-                          final radioNum = _radioNumbers?[emp.id];
-                          final avatarColor = Color(emp.color);
-                          return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 4),
-                            leading: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: avatarColor.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  _initials(emp.name),
-                                  style: GoogleFonts.sora(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: avatarColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            title: Text(
-                              emp.name,
-                              style: GoogleFonts.sora(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.text,
-                              ),
-                            ),
-                            trailing: Text(
-                              radioNum ?? '—',
-                              style: GoogleFonts.dmMono(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: radioNum != null
-                                    ? AppColors.gradientStart
-                                    : AppColors.textMuted,
-                              ),
-                            ),
-                            onTap: () => _editRadioNumber(emp),
-                          );
-                        },
-                      ),
+                        trailing: Text(
+                          radioNum ?? '—',
+                          style: GoogleFonts.dmMono(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: radioNum != null
+                                ? AppColors.gradientStart
+                                : AppColors.textMuted,
+                          ),
+                        ),
+                        onTap: () => _editRadioNumber(emp),
+                      );
+                    },
+                  ),
           ),
 
           SizedBox(height: bottomPad + 16),

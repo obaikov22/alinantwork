@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/employee.dart';
 import '../../models/leave_record.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/calendar_date.dart';
 
 const _nameColWidth = 80.0;
 const _minCellWidth = 36.0;
@@ -28,12 +29,14 @@ class WeeklyGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final days = List.generate(7, (i) => weekStart.add(Duration(days: i)));
+    final days = List.generate(7, (i) => addCalendarDays(weekStart, i));
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double cellWidth =
-            max(_minCellWidth, (constraints.maxWidth - _nameColWidth) / 7);
+        final double cellWidth = max(
+          _minCellWidth,
+          (constraints.maxWidth - _nameColWidth) / 7,
+        );
         final double totalWidth = _nameColWidth + 7 * cellWidth;
         final bool needsHScroll = totalWidth > constraints.maxWidth + 1;
 
@@ -211,10 +214,7 @@ class _EmployeeRow extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   employee.name.split(' ').first,
-                  style: GoogleFonts.sora(
-                    fontSize: 10,
-                    color: AppColors.text,
-                  ),
+                  style: GoogleFonts.sora(fontSize: 10, color: AppColors.text),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
@@ -227,7 +227,8 @@ class _EmployeeRow extends StatelessWidget {
                   (r) => r.employeeId == employee.id && r.containsDate(day),
                 )
                 .firstOrNull;
-            final isBirthday = employee.birthday.month == day.month &&
+            final isBirthday =
+                employee.birthday.month == day.month &&
                 employee.birthday.day == day.day;
             final isToday = _sameDay(day, today);
             final isWeekend = employee.weekendDays.contains(day.weekday);
@@ -330,7 +331,9 @@ class _DayCell extends StatelessWidget {
     return _CellStyle(
       bgColor: bgColor,
       radius: _spanRadius(),
-      border: isToday ? Border.all(color: borderColor) : _spanBorder(borderColor),
+      border: isToday
+          ? Border.all(color: borderColor)
+          : _spanBorder(borderColor),
       child: child,
     );
   }
@@ -346,8 +349,7 @@ class _DayCell extends StatelessWidget {
   }
 
   _CellStyle _emptyStyle() {
-    final borderColor =
-        isToday ? AppColors.gradientStart : AppColors.border;
+    final borderColor = isToday ? AppColors.gradientStart : AppColors.border;
     return _CellStyle(
       bgColor: AppColors.surface,
       radius: BorderRadius.circular(3),

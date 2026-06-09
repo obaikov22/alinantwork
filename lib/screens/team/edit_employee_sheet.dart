@@ -33,8 +33,7 @@ class _EditEmployeeSheetState extends ConsumerState<EditEmployeeSheet> {
     final e = widget.employee;
     _nameController = TextEditingController(text: e.name);
     _roleController = TextEditingController(text: e.role ?? '');
-    _daysController =
-        TextEditingController(text: e.totalAnnualDays.toString());
+    _daysController = TextEditingController(text: e.totalAnnualDays.toString());
     _birthday = e.birthday;
     _selectedColorIndex = _colorIndex(e.color);
     _weekendDays = List<int>.from(e.weekendDays);
@@ -78,7 +77,7 @@ class _EditEmployeeSheetState extends ConsumerState<EditEmployeeSheet> {
       id: widget.employee.id,
       name: _nameController.text.trim(),
       birthday: _birthday,
-      totalAnnualDays: int.tryParse(_daysController.text) ?? 28,
+      totalAnnualDays: int.tryParse(_daysController.text) ?? 20,
       usedAnnualDays: widget.employee.usedAnnualDays,
       color: kAvatarColors[_selectedColorIndex].toARGB32(),
       createdAt: widget.employee.createdAt,
@@ -148,10 +147,7 @@ class _EditEmployeeSheetState extends ConsumerState<EditEmployeeSheet> {
               // Birthday
               const SheetFieldLabel('Birthday'),
               const SizedBox(height: 6),
-              SheetDatePickerField(
-                value: _birthday,
-                onTap: _pickBirthday,
-              ),
+              SheetDatePickerField(value: _birthday, onTap: _pickBirthday),
               const SizedBox(height: 16),
 
               // Annual Days
@@ -159,7 +155,7 @@ class _EditEmployeeSheetState extends ConsumerState<EditEmployeeSheet> {
               const SizedBox(height: 6),
               SheetInputField(
                 controller: _daysController,
-                hint: '28',
+                hint: '20',
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (v) {

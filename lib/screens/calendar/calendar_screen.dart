@@ -6,6 +6,7 @@ import '../../models/leave_record.dart';
 import '../../providers/employees_provider.dart';
 import '../../providers/leave_records_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/calendar_date.dart';
 import 'add_leave_sheet.dart';
 import 'leave_records_list.dart';
 import 'weekly_grid.dart';
@@ -29,17 +30,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   static DateTime _mondayOf(DateTime date) {
     final weekday = date.weekday; // 1=Mon, 7=Sun
-    return DateTime(date.year, date.month, date.day - (weekday - 1));
+    return addCalendarDays(date, -(weekday - 1));
   }
 
   void _prevWeek() =>
-      setState(() => _weekStart = _weekStart.subtract(const Duration(days: 7)));
+      setState(() => _weekStart = addCalendarDays(_weekStart, -7));
 
   void _nextWeek() =>
-      setState(() => _weekStart = _weekStart.add(const Duration(days: 7)));
+      setState(() => _weekStart = addCalendarDays(_weekStart, 7));
 
   String _monthYearLabel() {
-    final lastDay = _weekStart.add(const Duration(days: 6));
+    final lastDay = addCalendarDays(_weekStart, 6);
     if (_weekStart.month == lastDay.month) {
       return DateFormat('MMMM yyyy').format(_weekStart);
     }
@@ -53,7 +54,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final (label, color) = switch (record.type) {
       LeaveType.annual => ('Annual Leave', AppColors.annualLeave),
       LeaveType.sick => ('Sick Leave', AppColors.sickLeave),
-      LeaveType.birthdayHoliday => ('Birthday Holiday', AppColors.gradientStart),
+      LeaveType.birthdayHoliday => (
+        'Birthday Holiday',
+        AppColors.gradientStart,
+      ),
       LeaveType.bankHoliday => ('Bank Holiday', AppColors.bankHoliday),
     };
     final dateRange = record.durationDays == 1
@@ -229,10 +233,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 Row(
                   children: [
                     _LegendItem(
-                        color: AppColors.gradientStart, label: 'Bday hol.'),
+                      color: AppColors.gradientStart,
+                      label: 'Bday hol.',
+                    ),
                     const SizedBox(width: 10),
                     _LegendItem(
-                        color: AppColors.bankHoliday, label: 'Bank hol.'),
+                      color: AppColors.bankHoliday,
+                      label: 'Bank hol.',
+                    ),
                   ],
                 ),
               ],
@@ -318,8 +326,7 @@ class _ToggleBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: active ? AppColors.gradientStart : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
